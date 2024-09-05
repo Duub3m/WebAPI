@@ -1,0 +1,71 @@
+using InventoryAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
+
+namespace InventoryAPI.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class UserController : ControllerBase
+{
+   
+    private readonly ILogger<UserController> _logger;
+    private readonly UserRepository userRepository;
+
+    private readonly IConfiguration configuration;
+    public UserController( IConfiguration config, ILogger<UserController> logger)
+    {
+      configuration=config;
+        _logger = logger;
+        userRepository = new UserRepository(configuration.GetConnectionString("DefaultConnection"));
+    }
+
+    [HttpGet]
+    [Route("getAllUsers")]
+    public ActionResult GetAllUsers(){
+      var isReturned= userRepository.getAllUsers(); 
+      if (isReturned.Any()){
+         return Ok(isReturned);
+      }
+      else{
+         return NoContent();
+      }
+   }
+
+   [HttpGet]
+   [Route("getUser")]
+
+   public ActionResult GetUser([FromBody]int userId){
+      var isReturned = userRepository.getUser(userId);
+      if (isReturned == null){
+         return NoContent();
+      }
+      return Ok(isReturned);
+      }
+   
+
+    [HttpPost]
+    [Route("addUser")]
+   public ActionResult AddUsers([FromBody] User user){
+      var isAdded = userRepository.addUsers(user);
+      if (isAdded == true){
+         return Ok();
+      }
+      else{
+         return NoContent();
+      }
+   }
+
+   [HttpDelete]
+   [Route("deleteUser")]
+
+   public ActionResult DeleteUser([FromBody] int userId){
+      var isDeleted = userRepository.deleteUsers(userId);
+      if(isDeleted == true){
+         return Ok();
+      }
+      else{
+         return NoContent();
+      }
+         }
+}
